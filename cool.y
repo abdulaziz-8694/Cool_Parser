@@ -135,7 +135,9 @@
     %type <class_> class
     %type <feature> feature
     %type <expression> expr
+    %type <formals> formal_list_empty
     %type <formals> formal_list
+    %type <formal> formal
     /* You will want to change the following line. */
     %type <features> feature_list
     
@@ -178,12 +180,27 @@
     { $$ = attr($1,$3,no_expr()); }
     | OBJECTID ':' TYPEID ASSIGN expr ';'
     { $$ = attr($1,$3,$5); }
-    | OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
+    | OBJECTID '(' formal_list_empty ')' ':' TYPEID '{' expr '}' ';'
     { $$ = method($1,$3,$6,$8); }
     ;
     
-    formal_list:	/*Empty*/
+    /*Can be either empty or, one or more than one, formal parameters*/
+    formal_list_empty:	/*Empty*/
     { $$ = nil_Formals(); }
+    | formal_list
+    { $$ = append_Formals($1,nil_Formals()); }
+    ;
+    
+    /*Can be one or more than one formal parameters*/
+    formal_list	: formal
+    { $$ = single_Formals($1); }
+    | formal ',' formal_list
+    { $$ = append_Formals(single_Formals($1),$3); }
+    ;
+    
+    /*Definition of the formal from the cool grammer*/
+    formal	: OBJECTID ':' TYPEID
+    { $$ = formal($1,$3); }
     ;
     
     /*Some of the expression*/
