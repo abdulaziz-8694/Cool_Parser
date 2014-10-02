@@ -134,12 +134,8 @@
     %type <classes> class_list
     %type <class_> class
     %type <feature> feature
-    %type <formals> formal_list
-    %type <formal> formal
     %type <expression> expr
-    %type <expressions> expr_param
-    %type <expressions> expr_block
-    
+    %type <formals> formal_list
     /* You will want to change the following line. */
     %type <features> feature_list
     
@@ -174,39 +170,30 @@
     feature_list:		/* empty */
     {  $$ = nil_Features(); }
     | feature_list feature
-    { $$ = append_Features($2,single_Features($1)); }
+    { $$ = append_Features($1,single_Features($2)); }
     ;
     
-    /*Feature can be method, attr without assignment or attribute with assignment*/
-    feature	: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
-    { $$ = method($1,$3,$6,$8); }
-    | OBJECTID ':' TYPEID ';'
+    /*Feature can be an attribute without assignment or atribute with assignment or method*/
+    feature	: OBJECTID ':' TYPEID ';'
     { $$ = attr($1,$3,no_expr()); }
     | OBJECTID ':' TYPEID ASSIGN expr ';'
     { $$ = attr($1,$3,$5); }
+    | OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
+    { $$ = method($1,$3,$6,$8); }
     ;
     
-    /*formal list can be empty or can contain one or more formal parameters for methods*/
-    formal_list:	/*empty*/
+    formal_list:	/*Empty*/
     { $$ = nil_Formals(); }
-    | formal ',' formal_list 
     ;
     
-    formal	: OBJECTID ':' TYPEID
-    { $$ = formal($1,$3); }
-    ;
-    
-    expr	: OBJECTID ASSIGN expr
-    { $$ = assign($1,$3); }
+    /*Some of the expression*/
+    expr	: 
+    { $$ = no_expr(); }
     | INT_CONST
     { $$ = int_const($1); }
-    |
-    { $$ = no_expr(); }
+    | OBJECTID ASSIGN expr
+    { $$ = assign($1,$3); }
     ;
-    
-	
-    
-    
     /* end of grammar */
     %%
     
