@@ -135,6 +135,7 @@
     %type <class_> class
     %type <feature> feature
     %type <expression> expr
+    %type <expressions> block_expr
     %type <formals> formal_list_empty
     %type <formals> formal_list
     %type <formal> formal
@@ -220,6 +221,8 @@
     { $$ = cond($2,$4,$6); }
     | WHILE expr LOOP expr POOL
     { $$ = loop($2,$4); }
+    | '{' block_expr '}'
+    { $$ = block($2); }
     | NEW TYPEID
     { $$ = new_($2); }
     | ISVOID expr
@@ -253,6 +256,11 @@
     | BOOL_CONST
     { $$ = bool_const($1); }
     ;
+    
+    block_expr: expr ';'
+    { $$ = single_Expressions($1);}
+    | expr ';' block_expr
+    { $$ = append_Expressions(single_Expressions($1),$3); }
     /* end of grammar */
     %%
     
