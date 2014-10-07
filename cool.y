@@ -173,6 +173,9 @@
     | class_list class	/* several classes */
     { $$ = append_Classes($1,single_Classes($2)); 
     parse_results = $$; }
+    | class_list error ';'
+    { $$ = $1;
+    parse_results = $$; }
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
@@ -293,13 +296,7 @@
     { $$ = let($1,$3,$5,$7); }
     ;
      
-    let_expr: IN expr
-    { $$ =$2; }
-    | ',' OBJECTID ':' TYPEID let_expr
-    { $$ = let($2,$4,no_expr(),$5); }
-    | ',' OBJECTID ':' TYPEID ASSIGN expr let_expr
-    { $$ = let($2,$4,$6,$7); }
-    ; 
+    
      
     case_list: single_case
     { $$ = single_Cases($1); }
@@ -318,8 +315,11 @@
     
     block_expr: expr ';'
     { $$ = single_Expressions($1);}
-    | expr ';' block_expr
-    { $$ = append_Expressions(single_Expressions($1),$3); }
+    | block_expr expr ';'
+    { $$ = append_Expressions($1,single_Expressions($2)); }
+    | block_expr error ';'
+    { $$ = $1; }
+    ;
     /* end of grammar */
     %%
     
