@@ -176,6 +176,9 @@
     | class_list error ';'
     { $$ = $1;
     parse_results = $$; }
+    | error ';'
+    { $$ = nil_Classes(); 
+    parse_results = $$;}
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
@@ -191,6 +194,8 @@
     {  $$ = nil_Features(); }
     | feature_list feature
     { $$ = append_Features($1,single_Features($2)); }
+    | feature_list error ';'
+    { $$ = $1; }
     ;
     
     
@@ -286,14 +291,14 @@
     { $$ = bool_const($1); }
     ;
     
-    let_expr: OBJECTID ':' TYPEID IN expr
-    { $$ = let($1,$3,no_expr(),$5); }
-    | OBJECTID ':' TYPEID ',' let_expr
-    { $$ = let($1,$3,no_expr(),$5); }
-    | OBJECTID ':' TYPEID ASSIGN expr IN expr
-    { $$ = let($1,$3,$5,$7); }
-    | OBJECTID ':' TYPEID ASSIGN expr ',' let_expr
-    { $$ = let($1,$3,$5,$7); }
+    let_expr: IN expr
+    { $$ = $2; }
+    | ',' OBJECTID ':' TYPEID let_expr
+    { $$ = let($2,$4,no_expr(),$5); }
+    | ',' OBJECTID ':' TYPEID ASSIGN expr let_expr 
+    { $$ = let($2,$4,$6,$7); }
+    | error let_expr
+    {  }
     ;
      
     
@@ -336,5 +341,3 @@
       
       if(omerrs>50) {fprintf(stdout, "More than 50 errors\n"); exit(1);}
     }
-    
-    
